@@ -47,7 +47,7 @@ The "automatic" mode is intelligently designed to find and display all **Light G
 | `compact`               | No       | Set to `true` for a compact view that hides entity names. Default is `false`.                                                                                           |
 | `tap_action`            | No       | A standard Home Assistant [action object](https://www.home-assistant.io/lovelace/actions/) to execute when the card's background is tapped.                               |
 | `secondary_info_entity` | No       | An entity ID whose state will be displayed as secondary info in the header (e.g., `sensor.living_room_temperature`).                                                    |
-| `alert_classes`         | No       | A list of sensor `device_class` for "alert" summary icons. See detailed breakdown below. Defaults to `['motion', 'occupancy', 'moisture', 'door', 'window']`. Supports `['light', 'scene', 'switch', 'fan', 'cover', 'lock', 'media_player', 'climate', 'input_boolean']`.         |
+| `alert_classes`         | No       | A list of sensor `device_class` for "alert" summary icons. See detailed breakdown below. Defaults to `['motion', 'occupancy', 'moisture', 'door', 'window']`. Supports `['motion', 'occupancy', 'moisture', 'door', 'window', 'gas', 'smoke', 'carbon_monoxide', 'safety', 'problem', 'opening', 'sound', 'vibration', 'plug']`.         |
 | `sensor_classes`        | No       | A list of sensor `device_class` for "sensor" summary icons. See detailed breakdown below. Defaults to `['temperature', 'humidity']`. Supports `['temperature', 'humidity', 'power', 'illuminance', 'pressure', 'battery', 'co2', 'volatile_organic_compounds']`.                                     |
 
 ### Detailed Parameter Breakdown
