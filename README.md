@@ -5,7 +5,7 @@ A highly customizable Lovelace card to summarize and control a Home Assistant Ar
 The "automatic" mode is intelligently designed to find and display all **Light Groups** and **Scenes** associated with an area, providing the most actionable controls without any manual configuration.
 
 ![Flexible Area Card Screenshot](https://user-images.githubusercontent.com/3356254/187915392-1a8470a1-7786-43b7-a3a8-e1de32e91547.png)
-*(This is an example image. You should replace `screenshot.png` with an actual screenshot of your card in action!)*
+*(This is an example image. You should replace this with a screenshot of your card in action!)*
 
 ## Features
 
@@ -41,35 +41,79 @@ This card is not in the default HACS store. You can add it as a custom repositor
 
 ## Configuration
 
-The card is configured through your Lovelace UI or in `ui-lovelace.yaml`.
+### Main Options
 
-| Parameter               | Required | Description                                                                                                                                                                                            |
-| ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `type`                  | **Yes**  | `custom:flexible-area-card`                                                                                                                                                                            |
-| `area`                  | **Yes**  | The `area_id` of the area you want to display (e.g., `living_room`, `kitchen`).                                                                                                                        |
-| `area_name`             | No       | Override the friendly name of the area.                                                                                                                                                                |
-| `icon`                  | No       | Override the default area icon in the header.                                                                                                                                                          |
-| `entities`              | No       | A list of entities to display as buttons. If omitted, the card enters "automatic" mode, showing light groups and scenes.                                                                               |
-| `compact`               | No       | Set to `true` for a compact view that hides entity names. Default is `false`.                                                                                                                          |
-| `tap_action`            | No       | A standard Home Assistant [action object](https://www.home-assistant.io/lovelace/actions/) to execute when the card's background is tapped.                                                               |
-| `secondary_info_entity` | No       | An entity ID whose state will be displayed as secondary info in the header (e.g., `sensor.living_room_temperature`).                                                                                   |
-| `alert_classes`         | No       | A list of sensor `device_class` to display as "alert" summary icons when active. Supports custom colors. Example: `['motion', { device_class: 'door', color: '#ff0000' }]`.                              |
-| `sensor_classes`        | No       | A list of sensor `device_class` to display as "sensor" summary icons if they exist in the area. Supports custom colors. Example: `['temperature', { device_class: 'humidity', color: '#3498db' }]`. |
+| Parameter               | Required | Description                                                                                                                                                             |
+| ----------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`                  | **Yes**  | `custom:flexible-area-card`                                                                                                                                             |
+| `area`                  | **Yes**  | The `area_id` of the area you want to display (e.g., `living_room`, `kitchen`).                                                                                         |
+| `area_name`             | No       | Override the friendly name of the area.                                                                                                                                 |
+| `icon`                  | No       | Override the default area icon in the header.                                                                                                                           |
+| `entities`              | No       | A list of entities to display as buttons. If omitted, the card enters "automatic" mode. See detailed breakdown below for customization.                                  |
+| `compact`               | No       | Set to `true` for a compact view that hides entity names. Default is `false`.                                                                                           |
+| `tap_action`            | No       | A standard Home Assistant [action object](https://www.home-assistant.io/lovelace/actions/) to execute when the card's background is tapped.                               |
+| `secondary_info_entity` | No       | An entity ID whose state will be displayed as secondary info in the header (e.g., `sensor.living_room_temperature`).                                                    |
+| `alert_classes`         | No       | A list of sensor `device_class` for "alert" summary icons. See detailed breakdown below. Defaults to `['motion', 'occupancy', 'moisture', 'door', 'window']`.           |
+| `sensor_classes`        | No       | A list of sensor `device_class` for "sensor" summary icons. See detailed breakdown below. Defaults to `['temperature', 'humidity']`.                                     |
+
+### Detailed Parameter Breakdown
+
+#### `entities` (list)
+Used to manually define which buttons appear on the card. Each item in the list can be a simple string (the entity ID) or an object for further customization.
+
+```yaml
+entities:
+  # Simple form:
+  - light.kitchen_main_lights
+  # Object form (for customization):
+  - entity: scene.kitchen_cooking
+    name: Cooking Mode
+    icon: mdi:pot-steam
+```
+
+**Entity Object Properties:**
+
+| Parameter | Required | Description                            |
+| --------- | -------- | -------------------------------------- |
+| `entity`  | **Yes**  | The full `entity_id` of the entity.    |
+| `name`    | No       | Override the button's name.            |
+| `icon`    | No       | Override the button's icon.            |
+
+---
+
+#### `alert_classes` & `sensor_classes` (list)
+These lists define which summary icons appear in the header. Each item can be a simple string (the `device_class`) to use default settings, or an object to specify a custom color.
+
+```yaml
+alert_classes:
+  # Simple form (uses default alert color):
+  - motion
+  # Object form (for custom color):
+  - device_class: door
+    color: 'var(--accent-color)'
+```
+
+**Alert/Sensor Object Properties:**
+
+| Parameter        | Required | Description                                                                 |
+| ---------------- | -------- | --------------------------------------------------------------------------- |
+| `device_class`   | **Yes**  | The `device_class` to look for (e.g., `motion`, `temperature`, `door`).     |
+| `color`          | No       | A custom CSS color for the icon's background (e.g., `#ff9800`, `var(--blue-color)`). |
 
 ## Examples
 
-### Basic Automatic Configuration
+### 1. Basic Automatic Configuration
 
-This is the simplest way to use the card. It will automatically find all light groups and scenes in your "Living Room" area and display them as buttons.
+This is the simplest way to use the card. It will automatically find all light groups and scenes in your "Living Room" area, use the default summary icons, and display them.
 
 ```yaml
 type: custom:flexible-area-card
 area: living_room
 ```
 
-### Advanced Manual Configuration
+### 2. Advanced Manual Configuration
 
-This example demonstrates many of the available options for full customization.
+This example uses all major options for a fully customized card.
 
 ```yaml
 type: custom:flexible-area-card
@@ -84,19 +128,19 @@ tap_action:
   action: navigate
   navigation_path: /lovelace/kitchen-detail
 
-# --- Header & Summary Icons ---
+# --- Header & Summary Icons (with custom colors) ---
 secondary_info_entity: sensor.kitchen_temperature
 alert_classes:
   - motion
   - device_class: door
-    color: 'var(--accent-color)' # Use a theme variable for color
+    color: 'var(--accent-color)' # Use a theme variable
   - window
 sensor_classes:
   - temperature
   - device_class: humidity
-    color: '#3498db' # Use a hex code for color
+    color: '#3498db' # Use a hex code
 
-# --- Manual Entity Buttons ---
+# --- Manual Entity Buttons (with custom names/icons) ---
 entities:
   - entity: light.kitchen_main_lights
     name: Main
