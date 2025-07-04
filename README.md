@@ -1,89 +1,110 @@
-# Flexible Area Card for Home Assistant
+# Flexible Area Card
 
-[![HACS Default](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
+A highly customizable Lovelace card to summarize and control a Home Assistant Area. This card provides an elegant overview of an area, automatically surfacing key controls and sensor information, while also allowing for deep manual customization.
 
-A highly customizable Lovelace card that combines the beautiful, native design of the Home Assistant Area Card with the power and flexibility to display an unlimited number of entities.
+The "automatic" mode is intelligently designed to find and display all **Light Groups** and **Scenes** associated with an area, providing the most actionable controls without any manual configuration.
 
-This card operates in two primary modes:
-1.  **Automatic Mode:** Just like the default Area Card, it automatically discovers and displays key entities and sensors from a specified area.
-2.  **Flexible Grid Mode:** Take full control and define a grid of buttons for any entities you want—including scenes—with no limit on the number of buttons.
-
-![Screenshot of Flexible Area Card](httpsd://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPOSITORY/main/screenshot.png) 
-*(**Note:** You should replace the URL above with a real link to a screenshot of your card in your repository)*
-
----
+![Flexible Area Card Screenshot](https://user-images.githubusercontent.com/3356254/187915392-1a8470a1-7786-43b7-a3a8-e1de32e91547.png)
+*(This is an example image. You should replace `screenshot.png` with an actual screenshot of your card in action!)*
 
 ## Features
 
--   **Automatic Mode:** Perfectly mimics the native Area Card by default.
--   **Flexible Grid Mode:** Display an unlimited number of entities, which wrap automatically (3 per row).
--   **Compact Display:** An optional `compact: true` mode for a smaller, icon-only button layout.
--   **Full `tap_action` Support:** Supports `navigate` (to other views or anchors), `call-service`, and other standard Home Assistant actions for the card background.
--   **Scene Support:** Activate scenes directly from a button.
--   **Customizable Header:** Override the area name and icon.
--   **Customizable Alert Icons:** You choose which binary sensor device classes appear as alert icons in the top-right corner.
--   **Custom Alert Colors:** Define a unique color for the background "ball" of each alert type.
--   **Customizable Sensor Display:** Choose which sensor value is displayed in the header.
--   **Customizable Entity Icons:** Manually set icons for any button in Flexible Grid Mode.
-
----
+*   **Automatic Mode:** No `entities` list required! The card automatically discovers and displays all Light Groups and Scenes within the specified area.
+*   **Manual Mode:** Define a specific list of entities for granular control over the buttons shown.
+*   **Informative Header:** Displays the area name, a custom icon, and can show the state of a key sensor (e.g., temperature) as secondary information.
+*   **Summary Icons:** At-a-glance status icons for alerts (motion, doors, windows) and sensors (temperature, humidity). Colors are fully customizable.
+*   **Dynamic Grid:** The entity buttons are arranged in a clean grid that adjusts based on the number of entities.
+*   **Compact Mode:** A smaller version of the card that shows only icons for a minimalist dashboard.
+*   **Tap Actions:** Supports `tap_action` for navigating to another view or calling a service when the main card area is clicked.
 
 ## Installation
 
-### HACS (Recommended)
+### Method 1: HACS (Recommended)
 
-1.  **Add Custom Repository:**
-    -   Go to **HACS > Frontend**.
-    -   Click the three-dot menu in the top right and select **"Custom repositories"**.
-    -   Paste the URL to this GitHub repository.
-    -   Select the category: **"Lovelace"**.
-    -   Click **"Add"**.
-2.  **Install Card:**
-    -   The "Flexible Area Card" should now be available to install from the HACS Frontend tab. Click **Install**.
-    -   HACS will automatically add the necessary resource to your Lovelace configuration.
+This card is not in the default HACS store. You can add it as a custom repository.
 
-### Manual Installation
+1.  Go to HACS > Frontend.
+2.  Click the 3-dots menu in the top right and select **"Custom repositories"**.
+3.  In the "Repository" field, paste the URL to your GitHub repository (e.g., `https://github.com/YOUR_USERNAME/YOUR_REPOSITORY`).
+4.  Select the category **"Lovelace"**.
+5.  Click **"Add"**. The card will now be available to install from the HACS frontend.
 
-1.  Download the `flexible-area-card.js` file from the latest [Release](https://github.com/YOUR_USERNAME/YOUR_REPOSITORY/releases).
-2.  Place the file in your `config/www/` directory. You can create a sub-folder if you wish (e.g., `config/www/flexible-area-card/`).
-3.  Add the resource to your Lovelace configuration:
-    -   Go to **Settings > Dashboards**.
-    -   Click the three-dot menu in the top right and select **"Resources"**.
-    -   Click **"+ Add Resource"**.
-    -   **URL:** `/local/flexible-area-card.js` (or the path to your sub-folder if you used one).
-    -   **Resource Type:** `JavaScript Module`.
-    -   Click **"Create"**.
-4.  Refresh your browser.
+### Method 2: Manual Installation
 
----
+1.  Download the `flexible-area-card.js` file from the latest [release](https://github.com/YOUR_USERNAME/YOUR_REPOSITORY/releases).
+2.  Place the downloaded file into your `config/www/` directory. You may need to create a subdirectory, for example, `config/www/community/flexible-area-card/`.
+3.  Add the resource reference to your Lovelace configuration. Go to **Settings > Dashboards**, click the 3-dots menu, and select **"Resources"**.
+4.  Click **"Add Resource"**:
+    *   Set **URL** to `/local/community/flexible-area-card/flexible-area-card.js` (adjust the path if you used a different one).
+    *   Set **Resource type** to `JavaScript Module`.
+5.  Save.
 
 ## Configuration
 
-### Main Options
+The card is configured through your Lovelace UI or in `ui-lovelace.yaml`.
 
-| Parameter | Type | Required? | Description |
-| :--- | :------ | :--- | :--- |
-| `type` | String | **Yes** | Must be `custom:flexible-area-card`. |
-| `area` | String | **Yes** | The ID of the area to display (e.g., `living_room`). |
-| `area_name` | String | No | Overrides the area's default name in the header. |
-| `icon` | String | No | Overrides the area's default icon in the header. |
-| `compact` | Boolean | No | Defaults to `false`. Set to `true` for the compact design. |
-| `tap_action` | Object | No | Action to perform when clicking the card background. (See below).|
-| `entities` | List | No | A list of entities to display. **Activates Flexible Grid Mode.** |
-| `alert_classes` | List | No | List of `binary_sensor` classes to show as alert icons. |
-| `sensor_classes`| List | No | List of `sensor` classes to show in the header. Defaults to `['temperature', 'humidity']`. |
-| `secondary_info_entity` | String | No | Manually sets a specific sensor to display in the header. |
+| Parameter               | Required | Description                                                                                                                                                                                            |
+| ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `type`                  | **Yes**  | `custom:flexible-area-card`                                                                                                                                                                            |
+| `area`                  | **Yes**  | The `area_id` of the area you want to display (e.g., `living_room`, `kitchen`).                                                                                                                        |
+| `area_name`             | No       | Override the friendly name of the area.                                                                                                                                                                |
+| `icon`                  | No       | Override the default area icon in the header.                                                                                                                                                          |
+| `entities`              | No       | A list of entities to display as buttons. If omitted, the card enters "automatic" mode, showing light groups and scenes.                                                                               |
+| `compact`               | No       | Set to `true` for a compact view that hides entity names. Default is `false`.                                                                                                                          |
+| `tap_action`            | No       | A standard Home Assistant [action object](https://www.home-assistant.io/lovelace/actions/) to execute when the card's background is tapped.                                                               |
+| `secondary_info_entity` | No       | An entity ID whose state will be displayed as secondary info in the header (e.g., `sensor.living_room_temperature`).                                                                                   |
+| `alert_classes`         | No       | A list of sensor `device_class` to display as "alert" summary icons when active. Supports custom colors. Example: `['motion', { device_class: 'door', color: '#ff0000' }]`.                              |
+| `sensor_classes`        | No       | A list of sensor `device_class` to display as "sensor" summary icons if they exist in the area. Supports custom colors. Example: `['temperature', { device_class: 'humidity', color: '#3498db' }]`. |
 
-### Advanced Configuration Details
+## Examples
 
-#### The `tap_action` Object
+### Basic Automatic Configuration
 
-This allows you to make the card background interactive. To navigate to another card on the same page, you must give the target card a `card_id`.
+This is the simplest way to use the card. It will automatically find all light groups and scenes in your "Living Room" area and display them as buttons.
 
 ```yaml
-# Example: Navigate to an anchor named 'details' on the current page
 type: custom:flexible-area-card
-area: office
+area: living_room
+```
+
+### Advanced Manual Configuration
+
+This example demonstrates many of the available options for full customization.
+
+```yaml
+type: custom:flexible-area-card
+# --- Basic Info ---
+area: kitchen
+area_name: "Chef's Domain"
+icon: mdi:silverware-fork-knife
+
+# --- Layout & Actions ---
+compact: true
 tap_action:
   action: navigate
-  navigation_path: '#details'
+  navigation_path: /lovelace/kitchen-detail
+
+# --- Header & Summary Icons ---
+secondary_info_entity: sensor.kitchen_temperature
+alert_classes:
+  - motion
+  - device_class: door
+    color: 'var(--accent-color)' # Use a theme variable for color
+  - window
+sensor_classes:
+  - temperature
+  - device_class: humidity
+    color: '#3498db' # Use a hex code for color
+
+# --- Manual Entity Buttons ---
+entities:
+  - entity: light.kitchen_main_lights
+    name: Main
+    icon: mdi:ceiling-light
+  - entity: light.kitchen_island_pendants
+    name: Island
+  - entity: scene.kitchen_cooking_mode
+    name: Cooking
+    icon: mdi:pot-steam
+  - entity: switch.coffee_machine
+```
