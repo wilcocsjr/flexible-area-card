@@ -199,11 +199,29 @@ class FlexibleAreaCard extends HTMLElement {
 
   attachEventListeners() {
     this._card.addEventListener('click', (ev) => {
-      if (ev.composedPath().find(p => p.classList && p.classList.contains('entity-button'))) { return; }
+      // Check if a button was clicked. If so, this listener does nothing.
+      if (ev.composedPath().find(p => p.classList && p.classList.contains('entity-button'))) {
+        return;
+      }
+      
+      // If the background was clicked, and a tap_action is defined, fire the event
       if (this._config.tap_action) {
-        const detail = { config: this._config.tap_action, action: this._config.tap_action.action };
-        const event = new Event('hass-action', { bubbles: true, composed: true, detail });
-        this.dispatchEvent(event);
+        if (this._config.tap_action.action === 'navigate') {
+          // For navigation actions, use the Home Assistant's built-in navigation
+          window.history.pushState(null, '', this._config.tap_action.navigation_path);
+          window.dispatchEvent(new CustomEvent('location-changed'));
+        } else {
+          // For other actions, use the standard event
+          const event = new Event('hass-action', {
+            bubbles: true,
+            composed: true,
+            detail: { 
+              config: this._config.tap_action,
+              action: this._config.tap_action.action 
+            },
+          });
+          this.dispatchEvent(event);
+        }
       }
     });
     this._contentContainer.querySelectorAll('.entity-button').forEach(button => {
