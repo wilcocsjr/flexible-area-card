@@ -23,27 +23,15 @@ The "automatic" mode is intelligently designed to find and display all **Light G
 
 1.  This card is available in the [Home Assistant Community Store (HACS)](https://hacs.xyz/).
 2.  Search for "Flexible Area Card" and install it.
-3.  Add the resource reference to your Lovelace configuration.
-
-    ```yaml
-    # In your ui-lovelace.yaml or dashboard raw configuration
-    resources:
-      - url: /hacsfiles/flexible-area-card/flexible-area-card.js
-        type: module
-    ```
 
 **Method 2: Manual Installation**
 
-1.  Download the `flexible-area-card.js` file from the [latest release](<link_to_your_releases_page>).
-2.  Place the file in your `config/www/` directory.
-3.  Add the resource reference to your Lovelace configuration.
+1.  Download the `flexible-area-card.js` file from the [latest release](https://github.com/wilcocsjr/flexible-area-card).
+2.  In your `config/www/` directory create a new folder named `flexible-area-card`.
+4.  Copy the downloaded `flexible-area-card.js` file to `config/www/flexible-area-card`.
+5.  On the Settings page go to Dashboards, click the three dots (⋮) in the top-right corner and click on Resources
+6.  Click Add Resource, paste the url `config/www/flexible-area-card/flexible-area-card.js`, select JavaScript module and click Create.
 
-    ```yaml
-    # In your ui-lovelace.yaml or dashboard raw configuration
-    resources:
-      - url: /local/flexible-area-card.js
-        type: module
-    ```
 
 ## Configuration
 
