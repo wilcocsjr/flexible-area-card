@@ -1,4 +1,4 @@
-// flexible-area-card.js - v37 (MODIFIED for Light Groups & Scenes, Hide Temp/Humidity icons, Fixed Header Alignment)
+// flexible-area-card.js - v40 (MODIFIED for Light Group Priority in Auto Mode)
 
 class FlexibleAreaCard extends HTMLElement {
   constructor() {
@@ -11,9 +11,9 @@ class FlexibleAreaCard extends HTMLElement {
         switch: 'mdi:power-plug',
         media_player: 'mdi:television',
         climate: 'mdi:thermostat',
-        scene: 'mdi:palette-outline',
         cover: 'mdi:window-open-variant',
         lock: 'mdi:lock',
+        input_boolean: 'mdi:toggle-switch-variant',
     };
   }
 
@@ -22,8 +22,14 @@ class FlexibleAreaCard extends HTMLElement {
       throw new Error('The "area" option is required.');
     }
     this._config = {
-      alert_classes: ['motion', 'occupancy', 'moisture', 'door', 'window'],
-      sensor_classes: ['temperature', 'humidity'],
+      alert_classes: [
+          'motion', 'occupancy', 'moisture', 'door', 'window',
+          'gas', 'smoke', 'carbon_monoxide', 'safety', 'problem',
+          'opening', 'sound', 'vibration', 'plug'
+      ],
+      sensor_classes: [
+          'pressure', 'co2', 'volatile_organic_compounds'
+      ],
       ...config,
     };
     this._isManual = !!this._config.entities && Array.isArray(this._config.entities);
@@ -71,12 +77,11 @@ class FlexibleAreaCard extends HTMLElement {
 
     const areaEntities = this.getEntitiesForArea(area.area_id);
     const headerHTML = this.renderHeader(area, areaEntities);
-    
-    // MODIFIED: Removed the .slice(0, 3) to show all found entities
+
     const entitiesToShow = this._isManual
       ? this._config.entities
       : this.getAutomaticEntities(areaEntities);
-      
+
     const contentHTML = this.renderGrid(entitiesToShow);
 
     this._contentContainer.innerHTML = `<div class="card-content-wrapper">${headerHTML}${contentHTML}</div>`;
@@ -109,6 +114,7 @@ class FlexibleAreaCard extends HTMLElement {
             const isOn = state.state === 'on' ||
                          state.state === 'open' ||
                          state.state === 'playing' ||
+                         state.state === 'locked' ||
                          (domain === 'fan' && state.state !== 'off') ||
                          (domain === 'climate' && state.state !== 'off');
             button.classList.toggle('state-on', isOn);
@@ -136,6 +142,7 @@ class FlexibleAreaCard extends HTMLElement {
         const isOn = state.state === 'on' ||
                      state.state === 'open' ||
                      state.state === 'playing' ||
+                     state.state === 'locked' ||
                      (domain === 'fan' && state.state !== 'off') ||
                      (domain === 'climate' && state.state !== 'off');
         const icon = (typeof entityConf !== 'string' ? entityConf.icon : null)
@@ -145,40 +152,45 @@ class FlexibleAreaCard extends HTMLElement {
                       || 'mdi:toggle-switch-variant';
         return `<button class="entity-button ${isOn ? 'state-on' : ''}" data-entity-id="${entityId}" data-domain="${domain}"><ha-icon class="button-icon" icon="${icon}"></ha-icon>${this._isCompact ? '' : `<span class="button-name">${name}</span>`}</button>`;
     }).join('');
-    // MODIFIED: Adjust grid columns based on the number of entities to prevent overflow
-    const columnCount = Math.min(entities.length, 3);
+
+    const columnCount = this._config.columns || Math.min(entities.length, 3);
     return `<div class="entities-grid" style="grid-template-columns: repeat(${columnCount}, 1fr);">${gridHTML}</div>`;
   }
 
   renderSummary(areaEntities) {
     const summaryIcons = [];
-    const alertClassToIconMap = { moisture:'mdi:water', motion:'mdi:motion-sensor', door:'mdi:door-open', window:'mdi:window-open', gas:'mdi:gas-cylinder', smoke:'mdi:smoke', safety:'mdi:shield-check', occupancy:'mdi:home' };
-    
-    // MODIFICATION: Removed temperature and humidity to hide their icons
-    const sensorClassToIconMap = { power: 'mdi:flash', illuminance: 'mdi:brightness-5' };
-    
+    const alertClassToIconMap = {
+        motion: 'mdi:motion-sensor', occupancy: 'mdi:home', moisture: 'mdi:water',
+        door: 'mdi:door-open', window: 'mdi:window-open', gas: 'mdi:gas-cylinder',
+        smoke: 'mdi:smoke', carbon_monoxide: 'mdi:molecule-co', safety: 'mdi:shield-check',
+        problem: 'mdi:alert-circle', opening: 'mdi:box-variant', sound: 'mdi:ear-hearing',
+        vibration: 'mdi:vibrate', plug: 'mdi:power-plug-off'
+    };
+
+    const sensorClassToIconMap = {
+        temperature: 'mdi:thermometer', humidity: 'mdi:water-percent', power: 'mdi:flash',
+        illuminance: 'mdi:brightness-5', pressure: 'mdi:gauge', battery: 'mdi:battery',
+        co2: 'mdi:molecule-co2', volatile_organic_compounds: 'mdi:air-filter'
+    };
+
     const DEFAULT_ALERT_COLOR = '#F79B22';
     const DEFAULT_SENSOR_COLOR = 'rgba(var(--rgb-primary-text-color), 0.05)';
 
     for (const item of this._config.alert_classes) {
       const dClass = typeof item === 'string' ? item : item.device_class;
       const color = (typeof item === 'object' && item.color) ? item.color : DEFAULT_ALERT_COLOR;
-
       const hasAlert = areaEntities.some(e => e.state.attributes.device_class === dClass && e.state.state === 'on');
       if (hasAlert && alertClassToIconMap[dClass]) {
-        const style = `background-color: ${color};`;
-        summaryIcons.push(`<div class="summary-icon" style="${style}" title="${dClass} alert"><ha-icon icon="${alertClassToIconMap[dClass]}"></ha-icon></div>`);
+        summaryIcons.push(`<div class="summary-icon" style="background-color: ${color};" title="${dClass} alert"><ha-icon icon="${alertClassToIconMap[dClass]}"></ha-icon></div>`);
       }
     }
 
     for (const item of this._config.sensor_classes) {
       const dClass = typeof item === 'string' ? item : item.device_class;
       const color = (typeof item === 'object' && item.color) ? item.color : DEFAULT_SENSOR_COLOR;
-      
       const hasSensor = areaEntities.some(e => e.state.attributes.device_class === dClass);
       if (hasSensor && sensorClassToIconMap[dClass]) {
-        const style = `background-color: ${color}; color: var(--primary-text-color); border: 1px solid var(--divider-color); box-sizing: border-box;`;
-        summaryIcons.push(`<div class="summary-icon" style="${style}" title="${dClass}"><ha-icon icon="${sensorClassToIconMap[dClass]}"></ha-icon></div>`);
+        summaryIcons.push(`<div class="summary-icon" style="background-color: ${color}; color: var(--primary-text-color); border: 1px solid var(--divider-color); box-sizing: border-box;" title="${dClass}"><ha-icon icon="${sensorClassToIconMap[dClass]}"></ha-icon></div>`);
       }
     }
 
@@ -189,13 +201,9 @@ class FlexibleAreaCard extends HTMLElement {
     this._card.addEventListener('click', (ev) => {
       if (ev.composedPath().find(p => p.classList && p.classList.contains('entity-button'))) { return; }
       if (this._config.tap_action) {
-        if (this._config.tap_action.action === 'navigate') {
-          window.history.pushState(null, '', this._config.tap_action.navigation_path);
-          window.dispatchEvent(new CustomEvent('location-changed'));
-        } else {
-          const event = new Event('hass-action', { bubbles: true, composed: true, detail: { config: this._config.tap_action, action: this._config.tap_action.action }, });
-          this.dispatchEvent(event);
-        }
+        const detail = { config: this._config.tap_action, action: this._config.tap_action.action };
+        const event = new Event('hass-action', { bubbles: true, composed: true, detail });
+        this.dispatchEvent(event);
       }
     });
     this._contentContainer.querySelectorAll('.entity-button').forEach(button => {
@@ -205,21 +213,21 @@ class FlexibleAreaCard extends HTMLElement {
       });
     });
   }
-  
+
   _handleButtonTap(entityId, buttonEl) {
     const domain = entityId.split('.')[0];
     if (domain === 'scene') {
       buttonEl.classList.add('scene-activated');
-      buttonEl.addEventListener('animationend', () => { buttonEl.classList.remove('scene-activated'); }, { once: true }); 
+      buttonEl.addEventListener('animationend', () => buttonEl.classList.remove('scene-activated'), { once: true });
       this._hass.callService('scene', 'turn_on', { entity_id: entityId });
       return;
     }
 
     let service;
+    const state = this._hass.states[entityId].state;
     switch (domain) {
-      case 'cover': service = this._hass.states[entityId].state === 'open' ? 'close_cover' : 'open_cover'; break;
-      case 'media_player': service = 'toggle'; break;
-      case 'climate': service = 'toggle'; break;
+      case 'lock': service = state === 'locked' ? 'unlock' : 'lock'; break;
+      case 'cover': service = state === 'open' ? 'close_cover' : 'open_cover'; break;
       default: service = 'toggle'; break;
     }
     const serviceDomain = service === 'toggle' ? 'homeassistant' : domain;
@@ -227,18 +235,17 @@ class FlexibleAreaCard extends HTMLElement {
   }
 
   getCardSize() { return this._isCompact ? 2 : 3; }
-  
+
   getStyles() {
     return `
       ha-card { padding: 0; display: flex; flex-direction: column; height: 100%; }
-      ha-card[clickable] { cursor: pointer; --mdc-ripple-press-opacity: 0; --mdc-ripple-hover-opacity: 0; }
+      ha-card[clickable] { cursor: pointer; }
       @keyframes scene-activation-fade {
         from { background-color: #F4E9CC; color: #F8C530; }
         to { background-color: rgba(var(--rgb-primary-text-color), 0.05); color: var(--primary-text-color); }
       }
       .card-content-wrapper { padding: 12px; display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1; }
       .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-      /* MODIFICATION: Changed align-items to flex-start to fix title drop */
       .header-main { display: flex; align-items: flex-start; gap: 8px; }
       .header-icon { color: var(--ha-area-icon-color, var(--primary-text-color)); width: 38px; height: 38px; flex-shrink: 0; }
       .info-container { display: flex; flex-direction: column; line-height: 1.3; }
@@ -247,7 +254,7 @@ class FlexibleAreaCard extends HTMLElement {
       .summary-icons { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; max-width: 50%; }
       .summary-icon { display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; color: white !important; }
       .summary-icon ha-icon { --mdc-icon-size: 12px; }
-      .entities-grid { display: grid; gap: 8px; grid-template-columns: repeat(3, 1fr); }
+      .entities-grid { display: grid; gap: 8px; }
       .entity-button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 52px; border-radius: 10px; border: none; color: var(--primary-text-color); cursor: pointer; transition: background-color 0.25s; box-sizing: border-box; background-color: rgba(var(--rgb-primary-text-color), 0.05); }
       .entity-button.state-on { background-color: #F4E9CC; color: #F8C530; }
       .entity-button.scene-activated { animation: scene-activation-fade 2s ease-out; }
@@ -261,9 +268,33 @@ class FlexibleAreaCard extends HTMLElement {
 
 FlexibleAreaCard.prototype.getEntitiesForArea=function(t){const{devices:e,entities:i}=this._hass,s=Object.values(e).filter(e=>e.area_id===t).map(e=>e.id);return Object.values(i).filter(e=>e.area_id===t||e.device_id&&s.includes(e.device_id)).map(e=>{const t=this._hass.states[e.entity_id];return t?{...e,state:t,domain:e.entity_id.split(".")[0]}:null}).filter(Boolean)};
 
-// MODIFIED: This function now gets all light groups and scenes from the area.
-FlexibleAreaCard.prototype.getAutomaticEntities = function(t) { const e = ["light", "scene"]; return t.filter(t => { const i = t.domain === "light" && t.state.attributes.entity_id && Array.isArray(t.state.attributes.entity_id); const s = t.domain === "scene"; return i || s }).sort((t, i) => e.indexOf(t.domain) - e.indexOf(i.domain)).map(t => t.entity_id) };
+// MODIFIED: This function now prioritizes light groups. If any are found in the area, only they are shown.
+// If no light groups are found, it falls back to showing all individual lights. Scenes are always shown.
+FlexibleAreaCard.prototype.getAutomaticEntities = function(areaEntities) {
+  const priority = ['light', 'scene'];
 
-FlexibleAreaCard.prototype.findSecondaryInfo=function(t){if(this._config.secondary_info_entity){const e=this._hass.states[this._config.secondary_info_entity];return e?`${e.state} ${e.attributes.unit_of_measurement||""}`.trim():null}for(const e of this._config.sensor_classes){const i=t.find(t=>t.state.attributes.device_class===e);if(i)return`${i.state.state} ${i.state.attributes.unit_of_measurement||""}`.trim()}return null};
+  const allLights = areaEntities.filter(e => e.domain === 'light');
+  const allScenes = areaEntities.filter(e => e.domain === 'scene');
+
+  // A light group is identified by having an 'entity_id' attribute that is an array of other lights.
+  const lightGroups = allLights.filter(e => e.state.attributes.entity_id && Array.isArray(e.state.attributes.entity_id));
+
+  let lightsToShow;
+  if (lightGroups.length > 0) {
+    // If groups exist, use only them.
+    lightsToShow = lightGroups;
+  } else {
+    // Otherwise, fall back to all individual lights.
+    lightsToShow = allLights;
+  }
+
+  const finalEntities = [...lightsToShow, ...allScenes];
+
+  return finalEntities
+    .sort((a, b) => priority.indexOf(a.domain) - priority.indexOf(b.domain))
+    .map(entity => entity.entity_id);
+};
+
+FlexibleAreaCard.prototype.findSecondaryInfo=function(t){if(this._config.secondary_info_entity){const e=this._hass.states[this._config.secondary_info_entity];return e?`${e.state.state} ${e.attributes.unit_of_measurement||""}`.trim():null}const e=t.find(e=>e.state.attributes.device_class==="temperature");if(e)return`${e.state.state} ${e.state.attributes.unit_of_measurement||""}`.trim();for(const i of this._config.sensor_classes){const s=typeof i=="string"?i:i.device_class,a=t.find(e=>e.state.attributes.device_class===s);if(a)return`${a.state.state} ${a.state.attributes.unit_of_measurement||""}`.trim()}return null};
 
 customElements.define('flexible-area-card', FlexibleAreaCard);
