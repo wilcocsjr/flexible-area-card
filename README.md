@@ -4,8 +4,8 @@ A highly customizable Lovelace card to summarize and control a Home Assistant Ar
 
 The "automatic" mode is intelligently designed to find and display all **Light Groups** and **Scenes** associated with an area, providing the most actionable controls without any manual configuration.
 
-![Flexible Area Card Screenshot](https://user-images.githubusercontent.com/3356254/187915392-1a8470a1-7786-43b7-a3a8-e1de32e91547.png)
-*(This is an example image. You should replace this with a screenshot of your card in action!)*
+![Flexible Area Card Screenshot](/darkTheme.png)
+![Flexible Area Card Screenshot](/lightTheme.png)
 
 ## Features
 
