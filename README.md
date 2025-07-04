@@ -19,25 +19,31 @@ The "automatic" mode is intelligently designed to find and display all **Light G
 
 ## Installation
 
-### Method 1: HACS (Recommended)
+**Method 1: HACS (Recommended)**
 
-This card is not in the default HACS store. You can add it as a custom repository.
+1.  This card is available in the [Home Assistant Community Store (HACS)](https://hacs.xyz/).
+2.  Search for "Flexible Area Card" and install it.
+3.  Add the resource reference to your Lovelace configuration.
 
-1.  Go to HACS > Frontend.
-2.  Click the 3-dots menu in the top right and select **"Custom repositories"**.
-3.  In the "Repository" field, paste the URL to your GitHub repository (e.g., `https://github.com/YOUR_USERNAME/YOUR_REPOSITORY`).
-4.  Select the category **"Lovelace"**.
-5.  Click **"Add"**. The card will now be available to install from the HACS frontend.
+    ```yaml
+    # In your ui-lovelace.yaml or dashboard raw configuration
+    resources:
+      - url: /hacsfiles/flexible-area-card/flexible-area-card.js
+        type: module
+    ```
 
-### Method 2: Manual Installation
+**Method 2: Manual Installation**
 
-1.  Download the `flexible-area-card.js` file from the latest [release](https://github.com/YOUR_USERNAME/YOUR_REPOSITORY/releases).
-2.  Place the downloaded file into your `config/www/` directory. You may need to create a subdirectory, for example, `config/www/community/flexible-area-card/`.
-3.  Add the resource reference to your Lovelace configuration. Go to **Settings > Dashboards**, click the 3-dots menu, and select **"Resources"**.
-4.  Click **"Add Resource"**:
-    *   Set **URL** to `/local/community/flexible-area-card/flexible-area-card.js` (adjust the path if you used a different one).
-    *   Set **Resource type** to `JavaScript Module`.
-5.  Save.
+1.  Download the `flexible-area-card.js` file from the [latest release](<link_to_your_releases_page>).
+2.  Place the file in your `config/www/` directory.
+3.  Add the resource reference to your Lovelace configuration.
+
+    ```yaml
+    # In your ui-lovelace.yaml or dashboard raw configuration
+    resources:
+      - url: /local/flexible-area-card.js
+        type: module
+    ```
 
 ## Configuration
 
