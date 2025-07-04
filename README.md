@@ -43,12 +43,12 @@ The "automatic" mode is intelligently designed to find and display all **Light G
 | `area`                  | **Yes**  | The `area_id` of the area you want to display (e.g., `living_room`, `kitchen`).                                                                                         |
 | `area_name`             | No       | Override the friendly name of the area.                                                                                                                                 |
 | `icon`                  | No       | Override the default area icon in the header.                                                                                                                           |
-| `entities`              | No       | A list of entities to display as buttons. If omitted, the card enters "automatic" mode. See detailed breakdown below for customization.                                  |
+| `entities`              | No       | A list of entities to display as buttons. If omitted, the card enters "automatic" mode. See detailed breakdown below for customization. Supports `['light', 'scene', 'switch', 'fan', 'cover', 'lock', 'media_player', 'climate', 'input_boolean']`.                                  |
 | `compact`               | No       | Set to `true` for a compact view that hides entity names. Default is `false`.                                                                                           |
 | `tap_action`            | No       | A standard Home Assistant [action object](https://www.home-assistant.io/lovelace/actions/) to execute when the card's background is tapped.                               |
 | `secondary_info_entity` | No       | An entity ID whose state will be displayed as secondary info in the header (e.g., `sensor.living_room_temperature`).                                                    |
-| `alert_classes`         | No       | A list of sensor `device_class` for "alert" summary icons. See detailed breakdown below. Defaults to `['motion', 'occupancy', 'moisture', 'door', 'window']`.           |
-| `sensor_classes`        | No       | A list of sensor `device_class` for "sensor" summary icons. See detailed breakdown below. Defaults to `['temperature', 'humidity']`.                                     |
+| `alert_classes`         | No       | A list of sensor `device_class` for "alert" summary icons. See detailed breakdown below. Defaults to `['motion', 'occupancy', 'moisture', 'door', 'window']`. Supports `['light', 'scene', 'switch', 'fan', 'cover', 'lock', 'media_player', 'climate', 'input_boolean']`.         |
+| `sensor_classes`        | No       | A list of sensor `device_class` for "sensor" summary icons. See detailed breakdown below. Defaults to `['temperature', 'humidity']`. Supports `['temperature', 'humidity', 'power', 'illuminance', 'pressure', 'battery', 'co2', 'volatile_organic_compounds']`.                                     |
 
 ### Detailed Parameter Breakdown
 
