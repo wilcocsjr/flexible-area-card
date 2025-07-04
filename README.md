@@ -30,7 +30,7 @@ The "automatic" mode is intelligently designed to find and display all **Light G
 2.  In your `config/www/` directory create a new folder named `flexible-area-card`.
 4.  Copy the downloaded `flexible-area-card.js` file to `config/www/flexible-area-card`.
 5.  On the Settings page go to Dashboards, click the three dots (⋮) in the top-right corner and click on Resources
-6.  Click Add Resource, paste the url `config/www/flexible-area-card/flexible-area-card.js`, select JavaScript module and click Create.
+6.  Click Add Resource, paste the url `/local/community/flexible-area-card/flexible-area-card.js`, select JavaScript module and click Create.
 
 
 ## Configuration
