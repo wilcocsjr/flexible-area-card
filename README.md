@@ -16,6 +16,8 @@ The "automatic" mode is intelligently designed to find and display all **Light G
 *   **Dynamic Grid:** The entity buttons are arranged in a clean grid that adjusts based on the number of entities.
 *   **Compact Mode:** A smaller version of the card that shows only icons for a minimalist dashboard.
 *   **Tap Actions:** Supports `tap_action` for navigating to another view or calling a service when the main card area is clicked.
+*   **Custom Button Actions:** Override the default 'toggle' action for any button to open a 'more-info' dialog, navigate, or call a service.
+
 
 ## Installation
 
@@ -49,6 +51,7 @@ The "automatic" mode is intelligently designed to find and display all **Light G
 | `secondary_info_entity` | No       | An entity ID whose state will be displayed as secondary info in the header (e.g., `sensor.living_room_temperature`).                                                    |
 | `alert_classes`         | No       | A list of sensor `device_class` for "alert" summary icons. See detailed breakdown below. Defaults to `['motion', 'occupancy', 'moisture', 'door', 'window']`. Supports `['motion', 'occupancy', 'moisture', 'door', 'window', 'gas', 'smoke', 'carbon_monoxide', 'safety', 'problem', 'opening', 'sound', 'vibration', 'plug']`.         |
 | `sensor_classes`        | No       | A list of sensor `device_class` for "sensor" summary icons. See detailed breakdown below. Defaults to `['temperature', 'humidity']`. Supports `['temperature', 'humidity', 'power', 'illuminance', 'pressure', 'battery', 'co2', 'volatile_organic_compounds']`.                                     |
+| `columns`               | No       | Manually set the number of columns in the grid. Defaults to 3.                                                                  |
 
 ### Detailed Parameter Breakdown
 
@@ -72,7 +75,7 @@ entities:
 | `entity`  | **Yes**  | The full `entity_id` of the entity.    |
 | `name`    | No       | Override the button's name.            |
 | `icon`    | No       | Override the button's icon.            |
-
+| `tap_action` | No       | A standard Home Assistant [action object](https://www.home-assistant.io/lovelace/actions/) to execute when the button is tapped. Defaults to `toggle`. |
 ---
 
 #### `alert_classes` & `sensor_classes` (list)
@@ -117,6 +120,7 @@ area_name: "Chef's Domain"
 icon: mdi:silverware-fork-knife
 
 # --- Layout & Actions ---
+columns: 4
 compact: true
 tap_action:
   action: navigate
@@ -134,7 +138,7 @@ sensor_classes:
   - device_class: humidity
     color: '#3498db' # Use a hex code
 
-# --- Manual Entity Buttons (with custom names/icons) ---
+# --- Manual Entity Buttons (with custom actions) ---
 entities:
   - entity: light.kitchen_main_lights
     name: Main
@@ -144,5 +148,9 @@ entities:
   - entity: scene.kitchen_cooking_mode
     name: Cooking
     icon: mdi:pot-steam
+  # This button opens the 'more-info' dialog instead of toggling
   - entity: switch.coffee_machine
+    name: Coffee
+    tap_action:
+      action: more-info
 ```
