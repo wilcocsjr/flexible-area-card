@@ -1,4 +1,4 @@
-// flexible-area-card.js - v42 (FIXED Custom Button Actions)
+// flexible-area-card.js - v42 (MODIFIED with Standard Hover/Click Feedback)
 
 class FlexibleAreaCard extends HTMLElement {
   constructor() {
@@ -86,7 +86,9 @@ class FlexibleAreaCard extends HTMLElement {
 
     const contentHTML = this.renderGrid(entitiesToShow);
 
-    this._contentContainer.innerHTML = `<div class="card-content-wrapper">${headerHTML}${contentHTML}</div>`;
+    // MODIFIED: Added a conditional ripple for the main card tap_action
+    const rippleHTML = this._config.tap_action ? '<ha-ripple></ha-ripple>' : '';
+    this._contentContainer.innerHTML = `<div class="card-content-wrapper">${headerHTML}${contentHTML}${rippleHTML}</div>`;
     this.attachEventListeners();
   }
 
@@ -154,7 +156,9 @@ class FlexibleAreaCard extends HTMLElement {
         this._hass.entities[entityId] ?.icon ||
         this.DOMAIN_ICONS[domain] ||
         'mdi:toggle-switch-variant';
-      return `<button class="entity-button ${isOn ? 'state-on' : ''}" data-entity-id="${entityId}" data-domain="${domain}"><ha-icon class="button-icon" icon="${icon}"></ha-icon>${this._isCompact ? '' : `<span class="button-name">${name}</span>`}</button>`;
+      
+      // MODIFIED: Added <ha-ripple> inside the button for click feedback
+      return `<button class="entity-button ${isOn ? 'state-on' : ''}" data-entity-id="${entityId}" data-domain="${domain}"><ha-icon class="button-icon" icon="${icon}"></ha-icon>${this._isCompact ? '' : `<span class="button-name">${name}</span>`}<ha-ripple></ha-ripple></button>`;
     }).join('');
 
     const columnCount = this._config.columns || Math.min(entities.length, 3);
@@ -246,8 +250,6 @@ class FlexibleAreaCard extends HTMLElement {
       window.history.pushState(null, '', config.navigation_path);
       window.dispatchEvent(new CustomEvent('location-changed'));
     } else {
-      // ***** THIS IS THE FIX *****
-      // Use CustomEvent instead of Event to properly pass the detail object.
       const event = new CustomEvent('hass-action', {
         bubbles: true,
         composed: true,
@@ -376,15 +378,21 @@ class FlexibleAreaCard extends HTMLElement {
   }
 
   getStyles() {
+    // MODIFIED: The entire styles section is updated for hover and ripple effects.
     return `
       ha-card {
         padding: 0;
         display: flex;
         flex-direction: column;
         height: 100%;
+        transition: background .2s ease-in-out; /* ADDED: Smooth background transition for hover */
       }
       ha-card[clickable] {
         cursor: pointer;
+      }
+      /* ADDED: Standard hover effect for the whole card */
+      ha-card[clickable]:hover {
+        background: var(--state-color, rgba(var(--rgb-primary-text-color), 0.05));
       }
       @keyframes scene-activation-fade {
         from {
@@ -402,6 +410,7 @@ class FlexibleAreaCard extends HTMLElement {
         flex-direction: column;
         justify-content: space-between;
         flex-grow: 1;
+        position: relative; /* ADDED: For containing the card's ripple effect */
       }
       .header {
         display: flex;
@@ -464,6 +473,8 @@ class FlexibleAreaCard extends HTMLElement {
         gap: 8px;
       }
       .entity-button {
+        position: relative; /* ADDED: For containing the button's ripple effect */
+        overflow: hidden; /* ADDED: To clip the ripple to the button's border-radius */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -477,11 +488,18 @@ class FlexibleAreaCard extends HTMLElement {
         transition: background-color 0.25s;
         box-sizing: border-box;
         background-color: rgba(var(--rgb-primary-text-color), 0.05);
-        overflow: hidden;
+      }
+      /* ADDED: Hover effect for buttons that are not in the 'on' state */
+      .entity-button:not(.state-on):hover {
+        background-color: rgba(var(--rgb-primary-text-color), 0.1);
       }
       .entity-button.state-on {
         background-color: #F4E9CC;
         color: #F8C530;
+      }
+      /* ADDED: Hover effect for buttons that ARE in the 'on' state */
+      .entity-button.state-on:hover {
+        background-color: #F7EED8; /* A slightly lighter version of the 'on' color */
       }
       .entity-button.scene-activated {
         animation: scene-activation-fade 2s ease-out;
